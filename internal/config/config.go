@@ -14,7 +14,7 @@ func getConfigFilePath() (string, error) {
     if err != nil {
         return "", fmt.Errorf("Could not find $HOME: %w", err)
     }
-    path := filepath.Join(homeDir, "bootdev", "gator", configFileName)
+    path := filepath.Join(homeDir, configFileName)
     return path, nil
 }
 
