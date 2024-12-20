@@ -66,3 +66,16 @@ func registerHander(s *state, cmd command) error {
 
 	return nil
 }
+
+func resetHandler(s *state, cmd command) error {
+	if len(cmd.args) != 0 {
+		return errors.New("'reset' does not expect any arguments.")
+	}
+    err := s.db.ResetUsers(context.Background())
+    if err != nil {
+        return fmt.Errorf("Could not reset DB: %w", err)
+    }
+
+    fmt.Println("Datadase reset successfully.")
+    return nil
+}
