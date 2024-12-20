@@ -1,23 +1,38 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 
 	"github.com/4madness7/gator/internal/config"
+	"github.com/4madness7/gator/internal/database"
+	_ "github.com/lib/pq"
+)
+
+const (
+	dbUrl = "postgres://postgres:postgres@localhost:5432/gator?sslmode=disable"
 )
 
 type state struct {
+	db  *database.Queries
 	cfg *config.Config
 }
 
 func main() {
+	db, err := sql.Open("postgres", dbUrl)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	cfg, err := config.Read()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	st := state{
+		db:  database.New(db),
 		cfg: &cfg,
 	}
 
@@ -25,6 +40,7 @@ func main() {
 		funcs: map[string]func(*state, command) error{},
 	}
 	cmds.register("login", loginHandler)
+	cmds.register("register", registerHander)
 
 	if len(os.Args) < 2 {
 		fmt.Println("Please provide an argument.")
