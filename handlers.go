@@ -80,7 +80,7 @@ func resetHandler(s *state, cmd command) error {
 	return nil
 }
 
-func usersHander(s *state, cmd command) error {
+func usersHandler(s *state, cmd command) error {
 	if len(cmd.args) != 0 {
 		return errors.New("'users' does not expect any arguments.")
 	}
@@ -100,5 +100,17 @@ func usersHander(s *state, cmd command) error {
 		}
 		fmt.Printf("* %s%s\n", user.Name, currentStr)
 	}
+	return nil
+}
+
+func aggHandler(s *state, cmd command) error {
+	if len(cmd.args) != 0 {
+		return errors.New("'agg' does not expect any arguments.")
+	}
+    feed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+    if err != nil {
+        return err
+    }
+    fmt.Println(*feed)
 	return nil
 }
