@@ -17,10 +17,10 @@ func loginHandler(s *state, cmd command) error {
 
 	username := cmd.args[0]
 
-    user, err := s.db.GetUser(context.Background(), username)
-    if err != nil {
-        return fmt.Errorf("User %s does not exist in the database.\nError: %w", username, err)
-    }
+	user, err := s.db.GetUser(context.Background(), username)
+	if err != nil {
+		return fmt.Errorf("User %s does not exist in the database.\nError: %w", username, err)
+	}
 
 	err = s.cfg.SetUser(user.Name)
 	if err != nil {
@@ -71,11 +71,34 @@ func resetHandler(s *state, cmd command) error {
 	if len(cmd.args) != 0 {
 		return errors.New("'reset' does not expect any arguments.")
 	}
-    err := s.db.ResetUsers(context.Background())
-    if err != nil {
-        return fmt.Errorf("Could not reset DB: %w", err)
-    }
+	err := s.db.ResetUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("Could not reset DB: %w", err)
+	}
 
-    fmt.Println("Datadase reset successfully.")
-    return nil
+	fmt.Println("Datadase reset successfully.")
+	return nil
+}
+
+func usersHander(s *state, cmd command) error {
+	if len(cmd.args) != 0 {
+		return errors.New("'users' does not expect any arguments.")
+	}
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("Something went wrong: %w", err)
+	}
+
+	if len(users) == 0 {
+		return fmt.Errorf("No users in the database")
+	}
+
+	for _, user := range users {
+		currentStr := ""
+		if s.cfg.CurrentUserName == user.Name {
+			currentStr = " (current)"
+		}
+		fmt.Printf("* %s%s\n", user.Name, currentStr)
+	}
+	return nil
 }

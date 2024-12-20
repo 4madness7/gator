@@ -42,6 +42,7 @@ func main() {
 	cmds.register("login", loginHandler)
 	cmds.register("register", registerHander)
 	cmds.register("reset", resetHandler)
+	cmds.register("users", usersHander)
 
 	if len(os.Args) < 2 {
 		fmt.Println("Please provide an argument.")
