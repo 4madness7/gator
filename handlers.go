@@ -16,7 +16,13 @@ func loginHandler(s *state, cmd command) error {
 	}
 
 	username := cmd.args[0]
-	err := s.cfg.SetUser(username)
+
+    user, err := s.db.GetUser(context.Background(), username)
+    if err != nil {
+        return fmt.Errorf("User %s does not exist in the database.\nError: %w", username, err)
+    }
+
+	err = s.cfg.SetUser(user.Name)
 	if err != nil {
 		return err
 	}
