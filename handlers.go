@@ -151,3 +151,18 @@ func addfeedHander(s *state, cmd command) error {
 
 	return nil
 }
+
+func feedsHandler(s *state, cmd command) error {
+	if len(cmd.args) != 0 {
+		return errors.New("'feeds' does not expect any arguments.")
+	}
+	rows, err := s.db.GetFeedsWithUser(context.Background())
+	if err != nil {
+		return err
+	}
+
+	for _, row := range rows {
+		fmt.Printf("User: %s | Feed Name: %s | Feed Url: %s\n", row.UserName, row.FeedName, row.Url)
+	}
+	return nil
+}
