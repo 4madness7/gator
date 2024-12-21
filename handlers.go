@@ -107,10 +107,47 @@ func aggHandler(s *state, cmd command) error {
 	if len(cmd.args) != 0 {
 		return errors.New("'agg' does not expect any arguments.")
 	}
-    feed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
-    if err != nil {
-        return err
-    }
-    fmt.Println(*feed)
+	feed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		return err
+	}
+	fmt.Println(*feed)
+	return nil
+}
+
+func addfeedHander(s *state, cmd command) error {
+	if len(cmd.args) != 2 {
+		return errors.New("'addfeed' expects 2 arguments. Ex. gator addfeed <name> <url>.")
+	}
+	current_time := time.Now()
+	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+	if err != nil {
+		return err
+	}
+	feed := database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: current_time,
+		UpdatedAt: current_time,
+		Name:      cmd.args[0],
+		Url:       cmd.args[1],
+		UserID:    user.ID,
+	}
+	newFeed, err := s.db.CreateFeed(context.Background(), feed)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Feed created successfully.")
+	fmt.Println("===== DEBUG =====")
+	fmt.Printf(`Feed Data {
+    id:         %v
+    created at: %v
+    updated at: %v
+    name:       %s
+    url:        %s
+    user id:    %v
+}`,
+		newFeed.ID, newFeed.CreatedAt, newFeed.UpdatedAt, newFeed.Name, newFeed.Url, newFeed.UserID)
+	fmt.Println()
+
 	return nil
 }
