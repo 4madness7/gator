@@ -46,6 +46,8 @@ func main() {
 	cmds.register("agg", aggHandler)
 	cmds.register("addfeed", addfeedHander)
 	cmds.register("feeds", feedsHandler)
+	cmds.register("follow", followHandler)
+	cmds.register("following", followingHandler)
 
 	if len(os.Args) < 2 {
 		fmt.Println("Please provide an argument.")
