@@ -229,3 +229,28 @@ func followingHandler(s *state, cmd command, user database.User) error {
 
 	return nil
 }
+
+func unfollowHandler(s *state, cmd command, user database.User) error {
+	if len(cmd.args) != 1 {
+		return errors.New("'unfollow' expects 1 argument. Ex. gator unfollow <url>.")
+	}
+
+	feed, err := s.db.GetFeedWithURL(context.Background(), cmd.args[0])
+	if err != nil {
+		return err
+	}
+
+	params := database.DeleteFeedFollowParams{
+		UserID: user.ID,
+		FeedID: feed.ID,
+	}
+
+	err = s.db.DeleteFeedFollow(context.Background(), params)
+	if err != nil {
+		return err
+	}
+
+    fmt.Printf("Feed '%s' unfollowed successfully.\n", feed.Name)
+
+	return nil
+}
