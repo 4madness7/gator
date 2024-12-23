@@ -115,15 +115,11 @@ func aggHandler(s *state, cmd command) error {
 	return nil
 }
 
-func addfeedHander(s *state, cmd command) error {
+func addfeedHander(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 2 {
 		return errors.New("'addfeed' expects 2 arguments. Ex. gator addfeed <name> <url>.")
 	}
 	current_time := time.Now()
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
-	if err != nil {
-		return err
-	}
 	feed := database.CreateFeedParams{
 		ID:        uuid.New(),
 		CreatedAt: current_time,
@@ -180,15 +176,11 @@ func feedsHandler(s *state, cmd command) error {
 	return nil
 }
 
-func followHandler(s *state, cmd command) error {
+func followHandler(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 1 {
 		return errors.New("'follow' expects 1 argument. Ex. gator follow <url>.")
 	}
 	current_time := time.Now()
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
-	if err != nil {
-		return err
-	}
 	feed, err := s.db.GetFeedWithURL(context.Background(), cmd.args[0])
 	if err != nil {
 		return err
@@ -220,14 +212,9 @@ func followHandler(s *state, cmd command) error {
 	return nil
 }
 
-func followingHandler(s *state, cmd command) error {
+func followingHandler(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 0 {
 		return errors.New("'following' does not expect any arguments")
-	}
-
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
-	if err != nil {
-		return err
 	}
 
 	follows, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)

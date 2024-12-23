@@ -44,10 +44,10 @@ func main() {
 	cmds.register("reset", resetHandler)
 	cmds.register("users", usersHandler)
 	cmds.register("agg", aggHandler)
-	cmds.register("addfeed", addfeedHander)
+	cmds.register("addfeed", middlewareLoggedIn(addfeedHander))
 	cmds.register("feeds", feedsHandler)
-	cmds.register("follow", followHandler)
-	cmds.register("following", followingHandler)
+	cmds.register("follow", middlewareLoggedIn(followHandler))
+	cmds.register("following", middlewareLoggedIn(followingHandler))
 
 	if len(os.Args) < 2 {
 		fmt.Println("Please provide an argument.")
