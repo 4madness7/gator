@@ -112,7 +112,7 @@ func (q *Queries) GetFeedsWithUser(ctx context.Context) ([]GetFeedsWithUserRow, 
 
 const getNextFeedToFetch = `-- name: GetNextFeedToFetch :one
 SELECT id, created_at, updated_at, name, url, user_id, last_fetched_at FROM feeds
-ORDER BY last_fetched_at, updated_at ASC NULLS FIRST
+ORDER BY last_fetched_at ASC NULLS FIRST, updated_at
 LIMIT 1
 `
 

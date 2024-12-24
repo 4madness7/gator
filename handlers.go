@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/4madness7/gator/internal/database"
@@ -258,6 +261,39 @@ func unfollowHandler(s *state, cmd command, user database.User) error {
 	return nil
 }
 
+func browseHandler(s *state, cmd command, user database.User) error {
+	if len(cmd.args) > 1 {
+		return errors.New("'browse' expects at max 1 argument. Ex. gator browse <number>.")
+	}
+
+	var limit int32
+	if len(cmd.args) == 0 {
+		limit = 2
+	} else {
+		num, err := strconv.Atoi(cmd.args[0])
+		if err != nil {
+			return errors.New("Could not convert argument.")
+		}
+		limit = int32(num)
+	}
+
+	posts, err := s.db.GetPostsForUser(
+		context.Background(),
+		database.GetPostsForUserParams{
+			UserID: user.ID,
+			Limit:  limit,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	for _, post := range posts {
+		fmt.Printf("- %v | %s\n", post.PublishedAt.Time, post.Title)
+	}
+	return nil
+}
+
 func scrapeFeeds(s *state) error {
 	feed, err := s.db.GetNextFeedToFetch(context.Background())
 	if err != nil {
@@ -281,11 +317,30 @@ func scrapeFeeds(s *state) error {
 
 	fmt.Println("=== Feed fetched ===")
 	fmt.Printf("Title: %s\n", rss.Channel.Title)
-	fmt.Printf("Link: %s\n", rss.Channel.Link)
-	fmt.Printf("Description: %s\n", rss.Channel.Description)
-	fmt.Printf("Items: \n")
 	for _, item := range rss.Channel.Item {
-		fmt.Printf("  - %s\n", item.Title)
+		pubDate, err := time.Parse("Mon, 02 Jan 2006 15:04:05 Z0700", item.PubDate)
+		if err != nil {
+			fmt.Printf("could not parse date of publishing, skipping | %v | %v\n", pubDate, item.PubDate)
+			continue
+		}
+		err = s.db.CreatePost(
+			context.Background(),
+			database.CreatePostParams{
+				ID:          uuid.New(),
+				CreatedAt:   current_time,
+				UpdatedAt:   current_time,
+				Title:       item.Title,
+				Url:         item.Link,
+				Description: sql.NullString{String: item.Description, Valid: true},
+				PublishedAt: sql.NullTime{Time: pubDate, Valid: true},
+				FeedID:      feed.ID,
+			},
+		)
+		if err != nil {
+			if !strings.Contains(err.Error(), "duplicate key") {
+				fmt.Println(err)
+			}
+		}
 	}
 	return nil
 }
